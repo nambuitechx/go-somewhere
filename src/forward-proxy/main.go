@@ -12,7 +12,6 @@ import (
 // var allowedCIDRs = []string {
 // 	"127.0.0.1", // local
 // 	"::1",       // ipv6 local
-// 	"0.0.0.0/32",
 // }
 
 // func isAllowed(remoteAddr string) bool {
@@ -95,7 +94,7 @@ func handleTunneling(w http.ResponseWriter, r *http.Request) {
 	go transfer(destConn, clientConn)
 	go transfer(clientConn, destConn)
 
-	log.Printf("[CONNECT] %s OK (%s)", r.Host, time.Since(start))
+	log.Printf("[CONNECT] FROM %s to %s OK (%s)", r.RemoteAddr, r.Host, time.Since(start))
 }
 
 func transfer(dst io.WriteCloser, src io.ReadCloser) {
@@ -115,7 +114,7 @@ func main() {
 			// 	return
 			// }
 
-			log.Printf("[Addr] Remote connection address: %s", r.RemoteAddr)
+			// log.Printf("[Addr] Remote connection address: %s", r.RemoteAddr)
 			
 			if r.Method == http.MethodConnect {
 				handleTunneling(w, r)

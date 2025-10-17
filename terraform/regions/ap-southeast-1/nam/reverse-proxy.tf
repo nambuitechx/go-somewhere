@@ -190,8 +190,8 @@ resource "aws_instance" "reverse_proxy" {
   instance_type               = "t3.micro"
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.ec2_public_sg.id]
-  iam_instance_profile        = aws_iam_instance_profile.ec2_profile.name
   associate_public_ip_address = true
+  iam_instance_profile        = aws_iam_instance_profile.ec2_profile.name
   key_name                    = aws_key_pair.mykey.key_name
 
   user_data = <<-EOF
@@ -217,83 +217,90 @@ resource "aws_instance" "reverse_proxy" {
 #################################################
 ####### ---------- Private EC2 ---------- #######
 #################################################
-# resource "aws_security_group" "ec2_private_sg" {
-#   name        = "private-ec2-sg"
-#   description = "Security group for private EC2 instance"
-#   vpc_id      = aws_vpc.main.id
+resource "aws_security_group" "ec2_private_sg" {
+  name        = "private-ec2-sg"
+  description = "Security group for private EC2 instance"
+  vpc_id      = aws_vpc.main.id
 
-#   ingress {
-#     description = "Allow inbound from ALB or Bastion"
-#     from_port   = 8000
-#     to_port     = 8000
-#     protocol    = "tcp"
-#     security_groups = [aws_security_group.ec2_public_sg.id]
-#   }
+  ingress {
+    description = "Allow SSH from ALB or Bastion"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    security_groups = [aws_security_group.ec2_public_sg.id]
+  }
 
-#   egress {
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = "-1"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
+  ingress {
+    description = "Allow TCP from ALB or Bastion"
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    security_groups = [aws_security_group.ec2_public_sg.id]
+  }
 
-#   tags = {
-#     Name = "${local.prefix}-private-ec2-sg"
-#   }
-# }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-# resource "aws_instance" "app_server" {
-#   ami                         = "${local.ec2_ami}"
-#   instance_type               = "t3.micro"
-#   subnet_id                   = aws_subnet.private.id
-#   vpc_security_group_ids      = [aws_security_group.ec2_private_sg.id]
-#   iam_instance_profile        = aws_iam_instance_profile.ec2_profile.name
-#   associate_public_ip_address = false
-#   key_name                    = aws_key_pair.mykey.key_name
+  tags = {
+    Name = "${local.prefix}-private-ec2-sg"
+  }
+}
 
-#   user_data = <<-EOF
-#     #!/bin/bash
-#     set -xe
+resource "aws_instance" "app_server" {
+  ami                         = "${local.ec2_ami}"
+  instance_type               = "t3.micro"
+  subnet_id                   = aws_subnet.private.id
+  vpc_security_group_ids      = [aws_security_group.ec2_private_sg.id]
+  associate_public_ip_address = false
+  iam_instance_profile        = aws_iam_instance_profile.ec2_profile.name
+  key_name                    = aws_key_pair.mykey.key_name
 
-#     # Install Docker
-#     sudo yum update -y
-#     sudo yum install docker -y aws-cli
-#     sudo systemctl enable docker
-#     sudo systemctl start docker
+  user_data = <<-EOF
+    #!/bin/bash
+    set -xe
 
-#     # Wait for Docker
-#     sleep 5
+    # Install Docker
+    sudo yum update -y
+    sudo yum install -y docker aws-cli
+    sudo systemctl enable docker
+    sudo systemctl start docker
 
-#     # Login to ECR
-#     aws ecr get-login-password --region ${local.region} | docker login --username AWS --password-stdin ${local.ecr_registry}
+    # Wait for Docker
+    sleep 5
 
-#     # Pull image
-#     IMAGE_URI="${local.backend_image_arn}"
-#     docker pull $IMAGE_URI
+    # Login to ECR
+    aws ecr get-login-password --region ${local.region} | docker login --username AWS --password-stdin ${local.ecr_registry}
 
-#     # Create systemd service for the container
-#     cat <<SERVICE > /etc/systemd/system/myapp.service
-#     [Unit]
-#     Description=MyApp Container
-#     After=docker.service
-#     Requires=docker.service
+    # Pull image
+    docker pull ${local.backend_image_arn}
 
-#     [Service]
-#     Restart=always
-#     ExecStart=/usr/bin/docker run --rm --name myapp -p 8000:8000 $IMAGE_URI
-#     ExecStop=/usr/bin/docker stop myapp
+    # Create systemd service for the container
+    cat <<SERVICE > /etc/systemd/system/myapp.service
+    [Unit]
+    Description=MyApp Container
+    After=docker.service
+    Requires=docker.service
 
-#     [Install]
-#     WantedBy=multi-user.target
-#     SERVICE
+    [Service]
+    Restart=always
+    ExecStart=/usr/bin/docker run --rm --name myapp -p 8000:8000 ${local.backend_image_arn}
+    ExecStop=/usr/bin/docker stop myapp
 
-#     # Enable and start the service
-#     systemctl daemon-reload
-#     systemctl enable myapp
-#     systemctl start myapp
-#   EOF
+    [Install]
+    WantedBy=multi-user.target
+    SERVICE
 
-#   tags = {
-#     Name = "${local.prefix}-private-ec2"
-#   }
-# }
+    # Enable and start the service
+    systemctl daemon-reload
+    systemctl enable myapp
+    systemctl start myapp
+  EOF
+
+  tags = {
+    Name = "${local.prefix}-private-ec2"
+  }
+}

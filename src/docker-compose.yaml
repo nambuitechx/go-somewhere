@@ -1,0 +1,16 @@
+version: "3.9"
+
+networks:
+  app_network:
+    driver: bridge
+
+services:
+  backend:
+    image: go-somewhere/backend:1.0.0
+    build:
+      dockerfile: Dockerfile
+      context: ./backend
+    ports:
+      - "8000:8000"
+    networks:
+      - app_network

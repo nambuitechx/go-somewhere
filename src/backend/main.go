@@ -1,16 +1,23 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
 	r := NewRouter()
-
-	log.Println("Server is running on port 8000")
+	port := os.Getenv("PORT")
 	
-	if err := http.ListenAndServe(":8000", r); err != nil {
+	if port == "" {
+		port = "8000"
+	}
+
+	log.Printf("Server is running on port %s", port)
+	
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), r); err != nil {
 		log.Fatal("failed to start server")
 	}
 }

@@ -5,12 +5,75 @@ networks:
     driver: bridge
 
 services:
-  backend:
+  backend0:
     image: go-somewhere/backend:1.0.0
     build:
       dockerfile: Dockerfile
       context: ./backend
     ports:
       - "8000:8000"
+    environment:
+      - PORT=8000
+    networks:
+      - app_network
+  
+  backend1:
+    image: go-somewhere/backend:1.0.0
+    build:
+      dockerfile: Dockerfile
+      context: ./backend
+    ports:
+      - "8001:8001"
+    environment:
+      - PORT=8001
+    networks:
+      - app_network
+  
+  backend2:
+    image: go-somewhere/backend:1.0.0
+    build:
+      dockerfile: Dockerfile
+      context: ./backend
+    ports:
+      - "8002:8002"
+    environment:
+      - PORT=8002
+    networks:
+      - app_network
+  
+  backend3:
+    image: go-somewhere/backend:1.0.0
+    build:
+      dockerfile: Dockerfile
+      context: ./backend
+    ports:
+      - "8003:8003"
+    environment:
+      - PORT=8003
+    networks:
+      - app_network
+  
+  backend4:
+    image: go-somewhere/backend:1.0.0
+    build:
+      dockerfile: Dockerfile
+      context: ./backend
+    ports:
+      - "8004:8004"
+    environment:
+      - PORT=8004
+    networks:
+      - app_network
+  
+  test-reverse-proxy:
+    image: go-somewhere/test-reverse-proxy:1.0.0
+    build:
+      dockerfile: Dockerfile
+      context: ./test-reverse-proxy
+    ports:
+      - "8888:8888"
+    environment:
+      - PORT=8888
+      - NUMBER_OF_BACKEND=5
     networks:
       - app_network

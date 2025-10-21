@@ -22,10 +22,13 @@ build-backend:
 build-forward-proxy:
 	docker build -t $(FORWARD_PROXY_IMAGE):$(TAG) ./forward-proxy
 
-build-test-reverse-proxy:
-	docker build -t $(TEST_REVERSE_PROXY_IMAGE):$(TAG) ./test-reverse-proxy
+build-reverse-proxy:
+	docker build -t $(REVERSE_PROXY_IMAGE):$(TAG) ./reverse-proxy
 
-build: build-backend build-forward-proxy build-test-reverse-proxy
+# build-test-reverse-proxy:
+# 	docker build -t $(TEST_REVERSE_PROXY_IMAGE):$(TAG) ./test-reverse-proxy
+
+build: build-backend build-forward-proxy build-reverse-proxy
 
 ### Push
 push-backend: login
@@ -36,7 +39,11 @@ push-forward-proxy: login
 	docker tag $(FORWARD_PROXY_IMAGE):$(TAG) $(ECR_REGISTRY)/$(FORWARD_PROXY_IMAGE):$(TAG)
 	docker push $(ECR_REGISTRY)/$(FORWARD_PROXY_IMAGE):$(TAG)
 
-push: push-backend push-forward-proxy
+push-reverse-proxy: login
+	docker tag $(REVERSE_PROXY_IMAGE):$(TAG) $(ECR_REGISTRY)/$(REVERSE_PROXY_IMAGE):$(TAG)
+	docker push $(ECR_REGISTRY)/$(REVERSE_PROXY_IMAGE):$(TAG)
+
+push: push-backend push-forward-proxy push-reverse-proxy
 
 ### Others
 run:

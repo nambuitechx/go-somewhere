@@ -43,8 +43,8 @@ func loadBalancer(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// Init backends
-	numberOfBackendString := os.Getenv("NUMBER_OF_BACKEND")
-	numberOfBackends, err := strconv.ParseInt(numberOfBackendString, 10, 64)
+	numberOfBackendsString := os.Getenv("NUMBER_OF_BACKENDS")
+	numberOfBackends, err := strconv.ParseInt(numberOfBackendsString, 10, 64)
 	if err != nil {
 		log.Fatalln("Failed to parse number of backends")
 	}

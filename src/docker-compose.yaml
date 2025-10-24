@@ -64,19 +64,6 @@ services:
   #     - PORT=8004
   #   networks:
   #     - app_network
-  
-  # test-reverse-proxy:
-  #   image: go-somewhere/test-reverse-proxy:1.0.0
-  #   build:
-  #     dockerfile: Dockerfile
-  #     context: ./test-reverse-proxy
-  #   ports:
-  #     - "8888:8888"
-  #   environment:
-  #     - PORT=8888
-  #     - NUMBER_OF_BACKENDS=5
-  #   networks:
-  #     - app_network
 
   reverse-proxy:
     image: go-somewhere/reverse-proxy:1.0.0
@@ -90,3 +77,54 @@ services:
       - BACKENDS=http://backend0:8000,http://backend1:8001,http://backend2:8002
     networks:
       - app_network
+  
+  # kafka:
+  #   image: go-somewhere/kafka:1.0.0
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: ./kafka
+  #   ports:
+  #     - "9092:9092"
+  #     - "9093:9093"
+  #   environment:
+  #     # Node and cluster roles
+  #     KAFKA_NODE_ID: 1
+  #     KAFKA_PROCESS_ROLES: broker,controller
+  #     KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+
+  #     # Listeners and advertised listeners
+  #     KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+  #     KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+  #     # Storage path (in KRaft mode this stores both logs + metadata)
+  #     KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+
+  #     # Optional convenience settings
+  #     KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  #   networks:
+  #     - app_network
+  
+  # scylla:
+  #   image: go-somewhere/scylla:1.0.0
+  #   build:
+  #     context: ./scylla
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "9042:9042"
+  #   networks:
+  #     - app_network
+  #   command: --smp 1 --memory 750M --overprovisioned 1
+  
+  # init-scylla:
+  #   image: go-somewhere/scylla:1.0.0
+  #   entrypoint: >
+  #     bash -c "sleep 10 && cqlsh scylla -f /init.cql"
+  #   volumes:
+  #     - ./scylla/init.cql:/init.cql
+  #   networks:
+  #     - app_network
+  #   depends_on:
+  #     - scylla

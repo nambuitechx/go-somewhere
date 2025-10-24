@@ -4,7 +4,9 @@
 BACKEND_IMAGE = go-somewhere/backend
 FORWARD_PROXY_IMAGE = go-somewhere/forward-proxy
 REVERSE_PROXY_IMAGE = go-somewhere/reverse-proxy
-TEST_REVERSE_PROXY_IMAGE = go-somewhere/test-reverse-proxy
+
+KAFKA_IMAGE = go-somewhere/kafka
+SCYLLA_IMAGE = go-somewhere/scylla
 
 TAG = 1.0.0
 REGION = ap-southeast-1
@@ -25,8 +27,11 @@ build-forward-proxy:
 build-reverse-proxy:
 	docker build -t $(REVERSE_PROXY_IMAGE):$(TAG) ./reverse-proxy
 
-# build-test-reverse-proxy:
-# 	docker build -t $(TEST_REVERSE_PROXY_IMAGE):$(TAG) ./test-reverse-proxy
+build-kafka:
+	docker build -t $(KAFKA_IMAGE):$(TAG) ./kafka
+
+build-scylla:
+	docker build -t $(SCYLLA_IMAGE):$(TAG) ./scylla
 
 build: build-backend build-forward-proxy build-reverse-proxy
 
@@ -42,6 +47,14 @@ push-forward-proxy: login
 push-reverse-proxy: login
 	docker tag $(REVERSE_PROXY_IMAGE):$(TAG) $(ECR_REGISTRY)/$(REVERSE_PROXY_IMAGE):$(TAG)
 	docker push $(ECR_REGISTRY)/$(REVERSE_PROXY_IMAGE):$(TAG)
+
+push-kafka: login
+	docker tag $(KAFKA_IMAGE):$(TAG) $(ECR_REGISTRY)/$(KAFKA_IMAGE):$(TAG)
+	docker push $(ECR_REGISTRY)/$(KAFKA_IMAGE):$(TAG)
+
+push-scylla: login
+	docker tag $(SCYLLA_IMAGE):$(TAG) $(ECR_REGISTRY)/$(SCYLLA_IMAGE):$(TAG)
+	docker push $(ECR_REGISTRY)/$(SCYLLA_IMAGE):$(TAG)
 
 push: push-backend push-forward-proxy push-reverse-proxy
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"strconv"
 	"time"
 
@@ -26,15 +27,23 @@ var logMetadata = table.Metadata{
 var logTable = table.New(logMetadata)
 
 func main()  {
+	keyspace := os.Getenv("KEYSPACE")
+	if keyspace == "" {
+		keyspace = "demo"
+	}
+
 	hosts := []string{"localhost:9042"}
 
 	// Create gocql cluster.
 	cluster := gocql.NewCluster(hosts...)
+	cluster.Keyspace = keyspace
+	cluster.Consistency = gocql.Quorum
+	cluster.Timeout = 5 * time.Second
 
 	// Wrap session on creation, gocqlx session embeds gocql.Session pointer.
 	session, err := gocqlx.WrapSession(cluster.CreateSession())
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to connect to ScyllaDB: %v", err)
 	}
 	defer session.Close()
 

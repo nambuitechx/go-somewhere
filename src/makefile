@@ -5,6 +5,7 @@ BACKEND_IMAGE = go-somewhere/backend
 FORWARD_PROXY_IMAGE = go-somewhere/forward-proxy
 REVERSE_PROXY_IMAGE = go-somewhere/reverse-proxy
 
+REDIS_IMAGE = go-somewhere/redis
 KAFKA_IMAGE = go-somewhere/kafka
 SCYLLA_IMAGE = go-somewhere/scylla
 
@@ -27,6 +28,9 @@ build-forward-proxy:
 build-reverse-proxy:
 	docker build -t $(REVERSE_PROXY_IMAGE):$(TAG) ./reverse-proxy
 
+build-redis:
+	docker build -t $(REDIS_IMAGE):$(TAG) ./redis
+
 build-kafka:
 	docker build -t $(KAFKA_IMAGE):$(TAG) ./kafka
 
@@ -47,6 +51,10 @@ push-forward-proxy: login
 push-reverse-proxy: login
 	docker tag $(REVERSE_PROXY_IMAGE):$(TAG) $(ECR_REGISTRY)/$(REVERSE_PROXY_IMAGE):$(TAG)
 	docker push $(ECR_REGISTRY)/$(REVERSE_PROXY_IMAGE):$(TAG)
+
+push-redis: login
+	docker tag $(REDIS_IMAGE):$(TAG) $(ECR_REGISTRY)/$(REDIS_IMAGE):$(TAG)
+	docker push $(ECR_REGISTRY)/$(REDIS_IMAGE):$(TAG)
 
 push-kafka: login
 	docker tag $(KAFKA_IMAGE):$(TAG) $(ECR_REGISTRY)/$(KAFKA_IMAGE):$(TAG)

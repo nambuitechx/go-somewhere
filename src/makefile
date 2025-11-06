@@ -8,6 +8,7 @@ REVERSE_PROXY_IMAGE = go-somewhere/reverse-proxy
 REDIS_IMAGE = go-somewhere/redis
 KAFKA_IMAGE = go-somewhere/kafka
 SCYLLA_IMAGE = go-somewhere/scylla
+PROMETHEUS_IMAGE=go-somewhere/prometheus
 
 TAG = 1.0.0
 REGION = ap-southeast-1
@@ -37,6 +38,9 @@ build-kafka:
 build-scylla:
 	docker build -t $(SCYLLA_IMAGE):$(TAG) ./scylla
 
+build-prometheus:
+	docker build -t $(PROMETHEUS_IMAGE):$(TAG) ./prometheus
+
 build: build-backend build-forward-proxy build-reverse-proxy
 
 ### Push
@@ -63,6 +67,10 @@ push-kafka: login
 push-scylla: login
 	docker tag $(SCYLLA_IMAGE):$(TAG) $(ECR_REGISTRY)/$(SCYLLA_IMAGE):$(TAG)
 	docker push $(ECR_REGISTRY)/$(SCYLLA_IMAGE):$(TAG)
+
+push-prometheus: login
+	docker tag $(PROMETHEUS_IMAGE):$(TAG) $(ECR_REGISTRY)/$(PROMETHEUS_IMAGE):$(TAG)
+	docker push $(ECR_REGISTRY)/$(PROMETHEUS_IMAGE):$(TAG)
 
 push: push-backend push-forward-proxy push-reverse-proxy
 

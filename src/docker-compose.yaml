@@ -78,16 +78,16 @@ services:
     networks:
       - app_network
   
-  redis:
-    image: go-somewhere/redis:1.0.0
-    build:
-      dockerfile: Dockerfile
-      context: ./redis
-    container_name: redis
-    ports:
-      - "6379:6379"
-    networks:
-      - app_network
+  # redis:
+  #   image: go-somewhere/redis:1.0.0
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: ./redis
+  #   container_name: redis
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - app_network
   
   # kafka:
   #   image: go-somewhere/kafka:1.0.0
@@ -121,8 +121,8 @@ services:
   # scylla:
   #   image: go-somewhere/scylla:1.0.0
   #   build:
-  #     context: ./scylla
   #     dockerfile: Dockerfile
+  #     context: ./scylla
   #   ports:
   #     - "9042:9042"
   #   networks:
@@ -139,3 +139,13 @@ services:
   #     - app_network
   #   depends_on:
   #     - scylla
+
+  # prometheus:
+  #   image: go-somewhere/prometheus:1.0.0
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: ./prometheus
+  #   ports:
+  #     - "9090:9090"
+  #   networks:
+  #     - app_network
